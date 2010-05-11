@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" minWidth="955" minHeight="600"
+				 creationComplete="application1_creationCompleteHandler(event)"
+				 mouseMove="application1_mouseMoveHandler(event)" mouseDown="application1_mouseDownHandler(event)">
+	<mx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			private var drawCurve:DrawCurve;
+			private var firstClick:Boolean;
+			private var startPoint:Object;
+			
+			protected function application1_creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				drawCurve = new DrawCurve(abc.graphics, abcd.graphics);
+				//abc.mask = abcd;
+			}
+
+
+			protected function application1_mouseMoveHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				//trace(this.mouseX, this.mouseY);
+			}
+
+
+			protected function application1_mouseDownHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				firstClick = !firstClick;
+				if(firstClick == false)
+				{
+					var endPoint:Object = {x:this.mouseX, y:this.mouseY};
+					drawCurve.cubic_curve(startPoint, endPoint);
+				}
+				else
+				{
+					startPoint = {x:this.mouseX, y:this.mouseY};
+				}
+			}
+
+
+		]]>
+	</mx:Script>
+	<mx:Canvas id="abc" width="500" height="500" y="0" />
+	<mx:Canvas id="abcd" width="500" height="500" y="0" />
+</mx:Application>
