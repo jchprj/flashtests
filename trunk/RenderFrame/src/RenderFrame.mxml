@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+	 creationComplete="application1_creationCompleteHandler(event)"
+	 layout="absolute" minWidth="955" minHeight="600">
+	<mx:Script>
+		<![CDATA[
+			import flash.utils.setInterval;
+			
+			import mx.events.FlexEvent;
+			
+			[Embed(source="map30.jpg")]
+			public static var Map:Class;
+			private var map:Bitmap = new Map;
+			
+			[Embed(source="map7.jpg")]
+			public static var Map1:Class;
+			private var map1:Bitmap = new Map1;
+			
+			private var bb:Bitmap;
+			private var ii:int=15;
+			private var i:int;
+
+			protected function application1_creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				var bitmapdata:BitmapData = new BitmapData(1000, 600);
+				var bitmap:Bitmap = new Bitmap(bitmapdata);
+				aaa.source = bitmap;
+				setInterval(drawframe, 10);
+			}
+			
+			private function drawframe():void
+			{
+				i+=ii;
+				//trace(ii);
+				if(Bitmap(aaa.source).bitmapData)
+				{
+					Bitmap(aaa.source).bitmapData.dispose();
+				}
+				var bbdata:BitmapData = new BitmapData(1000, 600);
+				if(i>100 || i<-100)
+				{
+					ii*=-1;
+				}
+				if(1)
+				{
+					bbdata.copyPixels(map.bitmapData, 
+										new Rectangle(0,0,1000,600),
+										new Point(i, 0));
+					//draw(new Map, bbdata);
+				}
+				else
+				{
+					bbdata.copyPixels(map1.bitmapData, 
+						new Rectangle(0,0,1000,600),
+						new Point(i, 0));
+					//draw(new Map1, bbdata);
+				}
+				bb = new Bitmap(bbdata);
+				aaa.source = bb;
+			}
+			
+			private function  draw(src:DisplayObject,target:BitmapData):BitmapData
+			{
+				if(src && target)
+				{
+					target.draw(src);
+				}
+				if(src is Bitmap)
+				{
+					Bitmap(src).bitmapData.dispose();
+				}
+				return target;
+			}
+
+		]]>
+	</mx:Script>
+	<mx:Image id="aaa" width="1000" height="600" />
+</mx:Application>
