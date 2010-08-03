@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="955" minHeight="600"
+			   creationComplete="application1_creationCompleteHandler(event)"
+			   mouseUp="application1_mouseUpHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			import mx.managers.CursorManager;
+			
+			import ui.FreeTran;
+			
+			private var freeTran:FreeTran;
+
+			protected function application1_creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				freeTran = new FreeTran(ui0);
+				ui1.rawChildren.addChild(freeTran);
+			}
+			
+			
+			protected function application1_mouseUpHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				//freeTran.pic=null;
+				Mouse.show();
+			}
+
+			protected function img_mouseDownHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				freeTran.dragPic(img);
+			}
+			
+			protected function img1_mouseDownHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				freeTran.dragPic(img1);
+			}
+			
+			private function showMouse():void
+			{
+				CursorManager.showCursor();
+			}
+
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<mx:Canvas id="ui0" >
+		<mx:Canvas id="ui1" />
+		<mx:Image id="img" source="37.png" width="100" height="100" maintainAspectRatio="false"
+				  mouseDown="img_mouseDownHandler(event)" mouseUp="showMouse()"/>
+		<mx:Image id="img1" source="50.png" width="100" height="100" maintainAspectRatio="false"
+				  mouseDown="img1_mouseDownHandler(event)" mouseUp="showMouse()" x="150"/>
+		
+	</mx:Canvas>
+</s:Application>
