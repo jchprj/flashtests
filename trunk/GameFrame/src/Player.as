@@ -7,6 +7,7 @@ package
 
 	public class Player extends AnimatedGameObject
 	{
+		private static var clickedPlayer:Player;
 		
 		private var speed:int = 3;
 		private var way:Point = new Point;
@@ -19,7 +20,7 @@ package
 		
 		public function startupPlayer():void
 		{
-			super.startupAnimatedGameObject(ResourceManager.PlayerGraphics[0], new Point(Application.application.width / 2, Application.application.height / 2), ZOrders.PlayerZOrder);
+			super.startupAnimatedGameObject(ResourceManager.PlayerGraphics[0], new Point(Math.random() * Application.application.width, Math.random() * Application.application.height / 2), ZOrders.PlayerZOrder);
 			this.collisionName = CollisionIdentifiers.PLAYER;
 		}
 		
@@ -32,7 +33,7 @@ package
 		{
 			super.enterFrame(dt);
 			
-			if(target != null)
+			if(target != null && clickedPlayer == this)
 			{
 				way.x = 0;
 				way.y = 0;
@@ -102,7 +103,10 @@ package
 			var point:Point = new Point(event.localX, event.localY);
 			if(this.CollisionArea.containsPoint(point))
 			{
-				trace(99);
+				clickedPlayer = this;
+				target = null;
+				way.x = 0;
+				way.y = 0;
 			}
 			else
 			{

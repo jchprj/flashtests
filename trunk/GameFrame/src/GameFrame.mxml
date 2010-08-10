@@ -73,6 +73,10 @@
 			{
 				currentState = "Game";
 				new Player().startupPlayer();
+				new Player().startupPlayer();
+				new Player().startupPlayer();
+				new Player().startupPlayer();
+				new Player().startupPlayer();
 			}  	  
 			
 			protected function enterGame(event:Event):void
