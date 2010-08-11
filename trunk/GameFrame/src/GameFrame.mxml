@@ -72,25 +72,20 @@
 			protected function startGameClicked(event:Event):void
 			{
 				currentState = "Game";
-				new Player().startupPlayer();
-				new Player().startupPlayer();
-				new Player().startupPlayer();
-				new Player().startupPlayer();
-				new Player().startupPlayer();
 			}  	  
 			
 			protected function enterGame(event:Event):void
 			{
 				//Mouse.hide();
 				GameObjectManager.Instance.startup();
-				//Level.Instance.startup();
+				GameManager.Instance.startup();
 				inGame = true;
 			}
 			
 			protected function exitGame(event:Event):void
 			{
 				Mouse.show();
-				//Level.Instance.shutdown();
+				GameManager.Instance.shutdown();
 				GameObjectManager.Instance.shutdown();
 				inGame = false;
 			}  

@@ -19,7 +19,7 @@ package
 		
 		protected function createBitmapData(image:DisplayObject):BitmapData
 		{
-			var bitmap:BitmapData = new BitmapData(image.width, image.height);
+			var bitmap:BitmapData = new BitmapData(image.width, image.height, true, 0);
 			bitmap.draw(image);
 			return bitmap;
 		}

@@ -1,26 +1,41 @@
 package
 {
+	import flash.display.Bitmap;
+	import flash.display.BitmapData;
 	import flash.events.*;
+	import flash.filters.GlowFilter;
 	import flash.geom.*;
 	
 	import mx.core.*;
 
 	public class Player extends AnimatedGameObject
 	{
+		/**当前选择的player，静态变量**/
 		private static var clickedPlayer:Player;
 		
+		/**每帧移动步长**/
 		private var speed:int = 3;
+		/**移动方向**/
 		private var way:Point = new Point;
+		/**移动目标点**/
 		private var target:Point;
+		/**player形象下标**/
+		private var resourceIndex:int;
+		/**当前player形象下标**/
+		private var currentIndex:int;
+		/**鼠标移上标志**/
+		private var moveover:Boolean;
 		
 		public function Player()
 		{			
 			
 		}
 		
-		public function startupPlayer():void
+		public function startupPlayer(index:int):void
 		{
-			super.startupAnimatedGameObject(ResourceManager.PlayerGraphics[0], new Point(Math.random() * Application.application.width, Math.random() * Application.application.height / 2), ZOrders.PlayerZOrder);
+			currentIndex = index;
+			resourceIndex = index;
+			super.startupAnimatedGameObject(ResourceManager.PlayerGraphics[index], new Point(Math.random() * Application.application.width, Math.random() * Application.application.height / 2), ZOrders.PlayerZOrder);
 			this.collisionName = CollisionIdentifiers.PLAYER;
 		}
 		
@@ -55,11 +70,13 @@ package
 				}
 				if(way.y != 0)
 				{
-					graphics = ResourceManager.PlayerGraphics[way.y > 0 ? 0 : 12];
+					currentIndex = way.y > 0 ? resourceIndex : (resourceIndex+12);
+					graphics = ResourceManager.PlayerGraphics[currentIndex];
 				}
-				else
+				else if(way.x != 0)
 				{
-					graphics = ResourceManager.PlayerGraphics[way.x > 0 ? 8 : 4];
+					currentIndex = way.x > 0 ? (resourceIndex+8): (resourceIndex+4);
+					graphics = ResourceManager.PlayerGraphics[currentIndex];
 				}
 				if(Math.abs(position.x - target.x) >= speed || Math.abs(position.y - target.y) >= speed)
 				{
@@ -74,7 +91,8 @@ package
 				}
 				else
 				{
-					graphics = ResourceManager.PlayerGraphics[0];
+					currentIndex = resourceIndex;
+					graphics = ResourceManager.PlayerGraphics[currentIndex];
 					target = null;
 					way.x = 0;
 					way.y = 0;
@@ -94,8 +112,25 @@ package
 		}
 		
 		override public function mouseMove(event:MouseEvent):void
-		{
-			// move player to mouse position			
+		{	
+			var point:Point = new Point(event.localX, event.localY);
+			if(this.CollisionArea.containsPoint(point))
+			{
+				if(moveover == false)
+				{
+					var bitmapdata:BitmapData =  new BitmapData(graphics.bitmap.width,  graphics.bitmap.height, true, 0x00000000);
+					bitmapdata.draw(graphics.bitmap);//.bitmap.clone();
+					trace(graphics.bitmap.rect);
+					bitmapdata.applyFilter(bitmapdata, graphics.bitmap.rect, new Point(0, 0), new GlowFilter(0xFFF000, 1, 9, 9));
+					graphics = new GraphicsResource(new Bitmap(bitmapdata), 3, 6);
+					moveover = true;
+				}
+			}
+			else
+			{
+				moveover = false;
+				graphics = ResourceManager.PlayerGraphics[currentIndex];
+			}
 		}
 		
 		override public function mouseDown(event:MouseEvent):void

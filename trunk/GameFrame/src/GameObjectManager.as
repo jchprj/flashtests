@@ -62,7 +62,7 @@ package
 	    	removeDeletedGameObjects();
 	    	insertNewGameObjects();
 	    	
-	    	//Level.Instance.enterFrame(seconds);
+	    	GameManager.Instance.enterFrame(seconds);
 	    	
 	    	checkCollisions();
 	    	
