@@ -2,13 +2,12 @@ package
 {
 	import flash.geom.Point;
 	
-	import mx.collections.ArrayCollection;
 	import mx.core.Application;
 
 	public class GameManager
 	{
 		protected static var instance:GameManager = null;
-		protected var bgElementGraphics:ArrayCollection = new ArrayCollection();
+		protected var bgElementGraphics:Array = new Array();
 		
 		static public function get Instance():GameManager
 		{
@@ -22,18 +21,18 @@ package
 			if ( GameManager.instance != null )
 				throw new Error( "Only one Singleton instance should be instantiated" );
 			
-			bgElementGraphics.addItem(ResourceManager.BgGraphic);
+			bgElementGraphics.push(ResourceManager.BgGraphic);
 		}
 		
 		public function startup():void
 		{
-			new Player().startupPlayer(0);
-			new Player().startupPlayer(1);
-			new Player().startupPlayer(2);
-			new Player().startupPlayer(3);
-			new Player().startupPlayer(16);
+			var indexes:Array = [0,1,2,3,16,17,18,19];
+			for(var i:int=0;i<int(Application.application.num.text);i++)
+			{
+				new Player().startupPlayer(indexes[Math.floor(Math.random()*8)]);
+			}
 			
-			var graphics:GraphicsResource = bgElementGraphics.getItemAt(0) as GraphicsResource;
+			var graphics:GraphicsResource = bgElementGraphics[0] as GraphicsResource;
 			var backgroundLevelElement:BackgroundLevelElement =  BackgroundLevelElement.pool.ItemFromPool as BackgroundLevelElement;
 			backgroundLevelElement.startupBackgroundLevelElement(
 				graphics, 

@@ -2,8 +2,8 @@
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" 
 				width="1000" height="600"
 				frameRate="100"
+			 	enterFrame="enterFrame(event)"
 				creationComplete="creationComplete()"
-				enterFrame="enterFrame(event)"
 				click="click(event)"
 				mouseDown="mouseDown(event)"
 				mouseUp="mouseUp(event)"
@@ -19,6 +19,9 @@
 		<mx:State name="MainMenu">
 			<mx:AddChild relativeTo="{myCanvas}" position="lastChild">
 				<mx:Button x="525" y="368" label="Start" id="btnStart" click="startGameClicked(event)"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{myCanvas}" position="lastChild">
+				<mx:TextInput x="525" y="338" text="100" id="num"/>
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
@@ -42,10 +45,6 @@
 				{
 					GameObjectManager.Instance.enterFrame();
 					
-					myCanvas.graphics.clear();
-					myCanvas.graphics.beginBitmapFill(GameObjectManager.Instance.backBuffer, null, false, false);
-					myCanvas.graphics.drawRect(0, 0, this.width, this.height);
-					myCanvas.graphics.endFill();
 				}	
 			}
 			
@@ -72,7 +71,7 @@
 			protected function startGameClicked(event:Event):void
 			{
 				currentState = "Game";
-			}  	  
+			}
 			
 			protected function enterGame(event:Event):void
 			{
@@ -80,6 +79,10 @@
 				GameObjectManager.Instance.startup();
 				GameManager.Instance.startup();
 				inGame = true;
+				//myCanvas.graphics.clear();
+				myCanvas.graphics.beginBitmapFill(GameObjectManager.Instance.backBuffer);
+				myCanvas.graphics.drawRect(0, 0, this.width, this.height);
+				myCanvas.graphics.endFill();
 			}
 			
 			protected function exitGame(event:Event):void

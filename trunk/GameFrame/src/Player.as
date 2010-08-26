@@ -35,7 +35,7 @@ package
 		{
 			currentIndex = index;
 			resourceIndex = index;
-			super.startupAnimatedGameObject(ResourceManager.PlayerGraphics[index], new Point(Math.random() * Application.application.width, Math.random() * Application.application.height / 2), ZOrders.PlayerZOrder);
+			super.startupAnimatedGameObject(ResourceManager.PlayerGraphics[index], new Point(Math.random() * Application.application.width, Math.random() * Application.application.height), ZOrders.PlayerZOrder);
 			this.collisionName = CollisionIdentifiers.PLAYER;
 		}
 		
@@ -99,15 +99,27 @@ package
 				}
 			}
 			
+			//position.x+=speed;
+			
 			// keep player on the screen
 			if (position.x < 0)
+			{
 				position.x = 0;
+				//speed = -speed;
+			}
 			if (position.x > Application.application.width - graphics.bitmap.width / graphics.frames)
+			{
 				position.x = Application.application.width - graphics.bitmap.width / graphics.frames;
+				//speed = -speed;
+			}
 			if (position.y < 0)
+			{
 				position.y = 0;
+			}
 			if (position.y > Application.application.height - graphics.bitmap.height )
-				position.y = Application.application.height - graphics.bitmap.height ;	
+			{
+				position.y = Application.application.height - graphics.bitmap.height ;
+			}
 			
 		}
 		
@@ -120,7 +132,7 @@ package
 				{
 					var bitmapdata:BitmapData =  new BitmapData(graphics.bitmap.width,  graphics.bitmap.height, true, 0x00000000);
 					bitmapdata.draw(graphics.bitmap);//.bitmap.clone();
-					trace(graphics.bitmap.rect);
+					//trace(graphics.bitmap.rect);
 					bitmapdata.applyFilter(bitmapdata, graphics.bitmap.rect, new Point(0, 0), new GlowFilter(0xFFF000, 1, 9, 9));
 					graphics = new GraphicsResource(new Bitmap(bitmapdata), 3, 6);
 					moveover = true;

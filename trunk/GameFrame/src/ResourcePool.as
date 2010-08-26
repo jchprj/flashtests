@@ -4,7 +4,7 @@ package
 	
 	public class ResourcePool
 	{
-		protected var pool:ArrayCollection = new ArrayCollection();
+		protected var pool:Array = new Array();
 		protected var newObject:Function = null;
 		
 		public function ResourcePool(newObject:Function)
@@ -21,7 +21,7 @@ package
 			}
 			
 			var newItem:GameObject = newObject();
-			pool.addItem(newItem);
+			pool.push(newItem);
 			return newItem;
 		}
 	}

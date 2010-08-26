@@ -12,7 +12,7 @@ package
 		public function GraphicsResource(image:DisplayObject, frames:int = 1, fps:Number = 0)
 		{
 			bitmap = createBitmapData(image);
-			bitmapAlpha = createAlphaBitmapData(image);
+			//bitmapAlpha = createAlphaBitmapData(image);
 			this.frames = frames;
 			this.fps = fps;
 		}

@@ -48,7 +48,6 @@ package
 			{
 				ResourceManager.PlayerGraphics.push(new GraphicsResource(new Bitmap(BitmapData(mc[i])), 3, 6));
 			}
-			
 			ld.contentLoaderInfo.removeEventListener(Event.COMPLETE, onLoad);
 			ld.contentLoaderInfo.addEventListener(Event.COMPLETE, onLoadBg);
 			ld.load(new URLRequest("bg.jpg"));

@@ -56,7 +56,7 @@ package
 			if (inuse)
 			{
 				var drawRect:Rectangle = new Rectangle(currentFrame * frameWidth, 0, frameWidth, graphics.bitmap.height);
-				db.copyPixels(graphics.bitmap, drawRect, position, graphics.bitmapAlpha, new Point(drawRect.x, 0), true);
+				db.copyPixels(graphics.bitmap, drawRect, position, null, null, true);
 			}
 		}
 		
