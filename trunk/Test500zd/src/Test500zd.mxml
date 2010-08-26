@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" minWidth="955" minHeight="600"
+				 creationComplete="application1_creationCompleteHandler(event)" frameRate="100"
+				  mouseMove="application1_mouseMoveHandler(event)"
+				  backgroundColor="#0">
+	<mx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+
+			protected function application1_creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+			}
+
+
+			protected function application1_mouseMoveHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+			}
+
+
+			protected function start_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				start.visible = false;
+				num.visible = false;
+				var main1:main = new main(int(num.text));
+				this.rawChildren.addChild(main1);
+			}
+
+		]]>
+	</mx:Script>
+	<mx:TextInput id="num" width="80" text="50" />
+	<mx:Button id="start" click="start_clickHandler(event)" label="start" x="100"/>
+</mx:Application>
