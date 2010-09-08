@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" 
-				width="800" height="600"
+				minWidth="800" minHeight="600" 
 				 creationComplete="application1_creationCompleteHandler(event)">
 	<mx:Script>
 		<![CDATA[
 			import flash.utils.clearInterval;
+			import flash.utils.getTimer;
 			import flash.utils.setInterval;
 			
 			import mx.controls.Button;
@@ -15,8 +16,8 @@
 			private var top:int;
 			private var setflag:int;
 			
-			private var bgXgrids:int = 10;
-			private var bgYgrids:int = 8;
+			private var bgXgrids:int = 100;
+			private var bgYgrids:int = 100;
 			
 			/**地图障碍数据**/
 			public var datas:Array;
@@ -27,6 +28,9 @@
 			protected function application1_creationCompleteHandler(event:FlexEvent):void
 			{
 				// TODO Auto-generated method stub
+				grids.rawChildren.addChild(new TestPath);
+				sizetxt.text = bgXgrids + "x" + bgYgrids;
+				return;
 				datas = new Array;
 				var i:int;
 				var xx:int;
@@ -37,7 +41,7 @@
 				{
 					xx = i % bgXgrids;
 					yy = Math.floor(i / bgXgrids);
-					if(xx == 5 && yy > 2 && yy < 6)
+					if(Math.random()<0.3)
 					{
 						datas.push(1);
 					}
@@ -64,6 +68,7 @@
 					lbl.setStyle("paddingRight", 0);
 					grids.addChild(lbl);
 				}
+				setflag = 1;
 			}
 			
 			private function onClick(e:MouseEvent):void
@@ -75,16 +80,30 @@
 					grids.getChildAt(fromp).filters = null;
 					fromp = i;
 					lbl.filters = [new GlowFilter(0xFFFF00)];
+					top = fromp;
 				}
 				if(setflag == 2)
 				{
-					grids.getChildAt(top).filters = null;
+					grids.getChildAt(fromp).filters = null;
+					fromp = top;
+					grids.getChildAt(fromp).filters = [new GlowFilter(0xFFFF00)];
 					top = i;
 					lbl.filters = [new GlowFilter(0xFF0000)];
+					findpath();
+				}
+				if(setflag == 3)
+				{
+					lbl.setStyle("color", 0xFFEE00);
+					datas[lbl.data] = 1;
+				}
+				if(setflag == 4)
+				{
+					lbl.setStyle("color", 0xFFFFFF);
+					datas[lbl.data] = 0;
 				}
 			}
 			
-			public function getPath(from:int, to:int):Array
+			public function getPath(from:int, to:int, flag:Boolean = true):Array
 			{
 				var path:Array = new Array;
 				var tmp:int;
@@ -95,8 +114,24 @@
 				tmppath.push(next);
 				var i:int;
 				var newway:int;
+				var last:int;
+				var lasttimes:int;
+				var spread:Array;
 				while(next != to)
 				{
+					if(last == next)
+					{
+						lasttimes++;
+						if(lasttimes == 10)
+						{
+							break;
+						}
+					}
+					else
+					{
+						lasttimes = 0;
+					}
+					last = next;
 					tmp = getNext(next, to);
 					if(tmp != -1)
 					{
@@ -106,9 +141,10 @@
 					}
 					else
 					{
+						spread = spreadNext(getWay(next, to), flag);
 						for(i=0;i<8;i++)
 						{
-							newway = towards(next, i);
+							newway = towards(next, spread[i]);
 							if(isIndexOK(newway))
 							{
 								tmppath.push(newway);
@@ -117,7 +153,11 @@
 						}
 						if(i==8)
 						{
-							next = path[path.length - 1];
+							if(path.length > 1)
+							{
+								next = path[path.length - 2];
+								path.pop();
+							}
 						}
 						else
 						{
@@ -126,7 +166,151 @@
 						}
 					}
 				}
+				if(modifybtn.selected)
+				{
+					checkPath(path);
+					checkPath(path);
+					/* var pathx:Array;
+					for(i=1;i<path.length - 1;i++)
+					{
+						pathx = getPath(from, path[i]);
+						if(pathx.length < i + 1)
+						{
+							path.splice(0, i + 1);
+							path = pathx.concat(path);
+							i = pathx.length - 1;
+						}
+					} */
+				}
 				return path;
+			}
+			
+			private function checkPath(path:Array):void
+			{
+				var i:int;
+				var j:int;
+				var k:int;
+				var pathx:Array;
+				for(i=0;i<path.length - 1;i++)
+				{
+					for(j=i+1;j<path.length;j++)
+					{
+						pathx = getLinePath(path[i], path[j]);
+						if(pathx.length > 1 && calPath(pathx) < calPath(path, i, j))
+						{
+							path.splice(i, j-i+1);
+							for(k=0;k<pathx.length;k++)
+							{
+								path.splice(i+k, 0, pathx[k]);
+							}
+							i = -1;
+							break;
+						}
+					}
+				}
+			}
+			
+			private function getLinePath(from:int, to:int):Array
+			{
+				var fromx:int = from % bgXgrids;
+				var fromy:int = Math.floor(from / bgXgrids);
+				var tox:int = to % bgXgrids;
+				var toy:int = Math.floor(to / bgXgrids);
+				var arr:Array = new Array;
+				var i:int;
+				var offset:int;
+				var diff:int;
+				var isok:Boolean = true;
+				var index:int;
+				if(fromx == tox)
+				{
+					diff = toy - fromy;
+					offset = diff / Math.abs(diff);
+					for(i=0;i<=Math.abs(diff);i++)
+					{
+						index = (fromy + offset * i) * bgXgrids + fromx;
+						arr.push(index);
+						if(datas[index] == 1)
+						{
+							isok = false;
+						}
+					}
+				}
+				if(fromy == toy)
+				{
+					diff = tox - fromx;
+					offset = diff / Math.abs(diff);
+					for(i=0;i<=Math.abs(diff);i++)
+					{
+						index = (from + offset * i);
+						arr.push(index);
+						if(datas[index] == 1)
+						{
+							isok = false;
+						}
+					}
+				}
+				if(Math.abs( (toy - fromy) / (tox - fromx) ) == 1)
+				{
+					var diffx:int = tox - fromx;
+					var diffy:int = toy - fromy;
+					var offsetx:int = diffx / Math.abs(diffx);
+					var offsety:int = diffy / Math.abs(diffy);
+					for(i=0;i<=Math.abs(diffx);i++)
+					{
+						index = (fromy + offsety * i) * bgXgrids + fromx + offsetx * i;
+						arr.push(index);
+						if(datas[index] == 1)
+						{
+							isok = false;
+						}
+					}
+				}
+				if(isok == false)
+				{
+					arr.splice(0, arr.length);
+				}
+				return arr;
+			}
+			
+			/**以某个方向为中心的扩散顺序**/
+			private function spreadNext(way:int, flag:Boolean):Array
+			{
+				var arr:Array = new Array;
+				if(flag)
+				{
+					arr.push(absway(way-1));
+					arr.push(absway(way+1));
+					arr.push(absway(way-2));
+					arr.push(absway(way+2));
+					arr.push(absway(way-3));
+					arr.push(absway(way+3));
+				}
+				else
+				{
+					arr.push(absway(way+1));
+					arr.push(absway(way-1));
+					arr.push(absway(way+2));
+					arr.push(absway(way-2));
+					arr.push(absway(way+3));
+					arr.push(absway(way-3));
+				}
+				arr.push(absway(way+4));
+				return arr;
+			}
+			
+			private function absway(way:int):int
+			{
+				var w:int = way;
+				if(w < 0)
+				{
+					w += 8;
+				}
+				if(way > 7)
+				{
+					w -= 8;
+				}
+				return w;
 			}
 			
 			/**根据起点和终点得到的最佳下一点**/
@@ -155,11 +339,11 @@
 				var toy:int = Math.floor(to / bgXgrids);
 				if(fromx == tox)
 				{
-					return toy > fromy ? 6 : 1;
+					return toy > fromy ? 5 : 1;
 				}
 				else if(fromy == toy)
 				{
-					return tox > fromx ? 4 : 3;
+					return tox > fromx ? 3 : 7;
 				}
 				else if(toy < fromy)
 				{
@@ -167,17 +351,35 @@
 				}
 				else
 				{
-					return fromx > tox ? 5 : 7; 
+					return fromx > tox ? 6 : 4; 
 				}
 			}
 			
 			/**返回当前下标的8个朝向的下标
 			 * 0  1  2
-			 * 3  i  4
-			 * 5  6  7
+			 * 7  i  3
+			 * 6  5  4
 			 * **/
 			private function towards(index:int, way:int):int
 			{
+				var xx:int = index % bgXgrids;
+				var yy:int = Math.floor(index / bgXgrids);
+				if(xx == 0 && (way == 0 || way == 7 || way == 6))
+				{
+					return -1;
+				}
+				if(xx == (bgXgrids - 1) && (way == 2 || way == 3 || way == 4))
+				{
+					return -1;
+				}
+				if(yy == 0 && (way == 0 || way == 1 || way == 2))
+				{
+					return -1;
+				}
+				if(yy == (bgYgrids - 1) && (way == 6 || way == 5 || way == 4))
+				{
+					return -1;
+				}
 				switch(way)
 				{
 					case 0:
@@ -189,19 +391,19 @@
 					case 2:
 						return index - bgXgrids + 1;
 						break;
-					case 3:
+					case 7:
 						return index - 1;
 						break;
-					case 4:
+					case 3:
 						return index + 1;
 						break;
-					case 5:
+					case 6:
 						return index + bgXgrids - 1;
 						break;
-					case 6:
+					case 5:
 						return index + bgXgrids;
 						break;
-					case 7:
+					case 4:
 						return index + bgXgrids + 1;
 						break;
 				}
@@ -232,25 +434,62 @@
 				}
 				return false;
 			}
-
-
-			protected function button1_clickHandler(event:MouseEvent):void
+			
+			private function calPath(arr:Array, start:int = 0, end:int = 0):Number
 			{
-				// TODO Auto-generated method stub
-				setflag = 1;
+				if(end == 0)
+				{
+					end = arr.length - 1;
+				}
+				var len:Number = 0;
+				var i:int;
+				var fromx:int;
+				var fromy:int;
+				var tox:int;
+				var toy:int;
+				for(i=start+1;i<end+1;i++)
+				{
+					fromx = arr[i-1] % bgXgrids;
+					fromy = Math.floor(arr[i-1] / bgXgrids);
+					tox = arr[i] % bgXgrids;
+					toy = Math.floor(arr[i] / bgXgrids);
+					if(fromx == tox || fromy == toy)
+					{
+						len += 1;
+					}
+					else
+					{
+						len += 1.414;
+					}
+				}
+				return len;
 			}
-			protected function button2_clickHandler(event:MouseEvent):void
+
+			protected function settype(value:int):void
 			{
 				// TODO Auto-generated method stub
-				setflag = 2;
+				setflag = value;
 			}
-
-
-			protected function button3_clickHandler(event:MouseEvent):void
+			
+			public function find(fromp:int, top:int):Array
 			{
-				// TODO Auto-generated method stub
 				var arr:Array = getPath(fromp, top);
-				pathstr.text = "from: " + fromp.toString() + "\nto: " + top.toString() + "\n" + arr.toString();
+				var arr1:Array = getPath(fromp, top, false);
+				if(calPath(arr1) < calPath(arr))
+				{
+					arr = arr1;
+				}
+				return arr;
+			}
+
+			protected function findpath():void
+			{
+				// TODO Auto-generated method stub
+				var t1:int = flash.utils.getTimer();
+				var arr:Array = find(fromp, top);
+				var t2:int = flash.utils.getTimer();
+				timetxt.text = (t2 - t1).toString() + "ms";
+				pathstr.text = arr.toString();
 				grids.graphics.clear();
 				grids.graphics.lineStyle(1, 0xFFF000);
 				current = 0;
@@ -277,12 +516,40 @@
 					clearInterval(interval);
 				}
 			}
+
+
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				var i:int;
+				var lbl:Label;
+				for(i=0;i<grids.numChildren;i++)
+				{
+					datas[i] = (0);
+					lbl = Label(grids.getChildAt(i));
+					if(datas[i] == 1)
+					{
+						lbl.setStyle("color", 0xFFEE00);
+					}
+					else
+					{
+						lbl.setStyle("color", 0xFFFFFF);
+					}
+				}
+			}
+
 		]]>
 	</mx:Script>
-	<mx:Canvas id="grids" x="50" y="50" width="510" height="376" >
+	<mx:Canvas id="grids" x="41" y="75" width="510" height="376" clipContent="false" >
 	</mx:Canvas>
-	<mx:Button x="50" y="10" label="from" click="button1_clickHandler(event)"/>
-	<mx:Button x="149" y="10" label="to" click="button2_clickHandler(event)"/>
-	<mx:Button x="242" y="10" label="find" click="button3_clickHandler(event)"/>
-	<mx:TextArea id="pathstr" x="50" y="434" width="510" height="68"/>
+	<mx:Button x="41" y="10" label="from" click="settype(1)"/>
+	<mx:Button x="103" y="10" label="to" click="settype(2)"/>
+	<mx:Button x="162" y="10" label="find" click="findpath()"/>
+	<mx:TextArea id="pathstr" x="41" y="40" width="701" height="27"/>
+	<mx:TextInput x="415" y="10" id="sizetxt" editable="false" text="10x8" width="72"/>
+	<mx:Button x="495" y="10" label="reset" click="button1_clickHandler(event)"/>
+	<mx:Button x="319" y="10" label="1" click="settype(3)"/>
+	<mx:Button x="367" y="10" label="0" click="settype(4)"/>
+	<mx:Label id="timetxt" x="627" y="12" text="Label" width="115" textAlign="right"/>
+	<mx:CheckBox x="604" y="10" label="modify" id="modifybtn"/>
 </mx:Application>
