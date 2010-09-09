@@ -46,7 +46,7 @@ package
 			addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 		} 
 		
-		public function reset(level:Number = 0.3) : void 
+		public function reset(level:Number = 0.3, setdatas:Array = null) : void 
 		{ 
 			if(screen)
 			{
@@ -58,17 +58,37 @@ package
 			addChildAt(screen, 0);
 			
 			this.map = []; 
-			var datas:Array = [];
+			var datas:Array;
 			
+			if(setdatas == null)
+			{
+				datas = [];
+			}
+			else
+			{
+				datas = setdatas;
+			}
+			var isBlock : Boolean
+			var k:int;
 			for (var j : int = 0; j < MAP_HEIGHT; j++) 
 			{ 
 				map[j] = []; 
 				for (var i : int = 0; i < MAP_WIDTH; i++) 
 				{ 
-					var isBlock : Boolean = Math.random() < level; 
+					isBlock = Math.random() < level; 
+					if(setdatas == null)
+					{
+						datas.push(isBlock?1:0);
+					}
+					else
+					{
+						setdatas[k] = int(setdatas[k]);
+						datas[k] = setdatas[k];
+						isBlock = setdatas[k]; 
+					}
 					map[j][i] = isBlock; 
-					datas.push(isBlock?1:0);
 					screen.bitmapData.setPixel(i,j,isBlock ? 0x000000 : 0xFFFFFF); 
+					k++;
 				} 
 			} 
 			screen.bitmapData.setPixel(0,0,0xFF0000); 
@@ -95,14 +115,16 @@ package
 		private function clickHandler(event : MouseEvent) : void 
 		{ 
 			if(setflag != 2 || 
-				screen.mouseX < 0 || screen.mouseX > MAP_WIDTH - 1 ||
-				screen.mouseY < 0 || screen.mouseY > MAP_HEIGHT - 1)
+				screen.mouseX < 0 || screen.mouseX > MAP_WIDTH ||
+				screen.mouseY < 0 || screen.mouseY > MAP_HEIGHT)
 			{
 				return;
 			}
 			var t:int = getTimer(); 
 			var fromp:int = int(playPoint.y)*MAP_WIDTH + int(playPoint.x);
 			var top:int = int(screen.mouseY)*MAP_WIDTH + int(screen.mouseX);
+			Application.application.startpos.text = fromp.toString();
+			Application.application.endpos.text = top.toString();
 			Path.instance.modifyflag = Application.application.modifybtn.selected;
 			if(Application.application.abtn.selected)
 			{
@@ -152,27 +174,32 @@ package
 		
 		private function enterframeHandler(event : Event) : void 
 		{
-			if (this.path == null || this.path.length == 0 || path.length == 1) 
+			if (this.path == null || this.path.length == 0) 
 				return; 
 			
 			screen.bitmapData.setPixel(playPoint.x,playPoint.y,0xFFFFFF); 
 			playPoint = this.path.shift() as Point; 
 			screen.bitmapData.setPixel(playPoint.x,playPoint.y,0xFF0000); 
+			var index:int = int(playPoint.y)*MAP_WIDTH + int(playPoint.x);
+			Application.application.currentpos.text = index.toString();
 			lines.graphics.lineTo(playPoint.x*5+2.5, playPoint.y*5+2.5);
 		} 
 		
 		private function setDatas(index:int, value:int):void
 		{
-			Path.instance.datas[index] = value;
 			var fromx:int;
 			var fromy:int;
 			fromx = index % MAP_WIDTH;
 			fromy = Math.floor(index / MAP_WIDTH);
-			screen.bitmapData.setPixel(fromx,fromy,value==1?0x000000:0xFFFFFF); 
+			if(fromx > -1 && fromx < MAP_WIDTH && fromy > -1 && fromy < MAP_HEIGHT)
+			{
+				Path.instance.datas[index] = value;
+				screen.bitmapData.setPixel(fromx,fromy,value==1?0x000000:0xFFFFFF); 
 			
-			this.map[fromy][fromx] = value == 1?true:false;
-			this.mapModel.map = this.map;//创建地图数据 
-			this.aStar = new AStar(this.mapModel);//根据数据生成A*类 
+				this.map[fromy][fromx] = value == 1?true:false;
+				this.mapModel.map = this.map;//创建地图数据 
+				this.aStar = new AStar(this.mapModel);//根据数据生成A*类
+			}
 		}
 	} 
 	

@@ -44,7 +44,7 @@ package
 			}
 		}
 		
-		private function getPath(from:int, to:int, flag:Boolean = true):Array
+		private function getPath(from:int, to:int, wayflag:Boolean = true):Array
 		{
 			var path:Array = [];
 			var tmp:int;
@@ -73,7 +73,7 @@ package
 				}
 				else
 				{
-					setSpread(getWay(next, to), flag);
+					setSpread(getWay(next, to), wayflag);
 					for(i=0;i<8;i++)
 					{
 						newway = towards(next, spreadOrder[i]);
@@ -130,21 +130,24 @@ package
 			var len:int = path.length - 1;
 			for(i=0;i<len;i++)
 			{
-				for(j=i+1;j<len;j++)
+				for(j=len-1;j>i;j--)
 				{
 					if(j - i > 1)
 					{
-						linetotal = getLinePath(path[i], path[j]);
-						if(linetotal > 1 && calPath(linepath, 0, linetotal - 1) < calPath(path, i, j))
+						linetotal = getLinePath(path[i], path[j], j-i);
+						if(linetotal > 1)
 						{
-							path.splice(i, j-i+1);
-							for(k=0;k<linetotal;k++)
+							if(linetotal < j - i || calPath(linepath, 0, linetotal - 1) < calPath(path, i, j))
 							{
-								path.splice(i+k, 0, linepath[k]);
+								path.splice(i, j-i+1);
+								for(k=0;k<linetotal;k++)
+								{
+									path.splice(i+k, 0, linepath[k]);
+								}
+								len = path.length - 1;
+								i = -1;
+								break;
 							}
-							len = path.length - 1;
-							i = -1;
-							break;
 						}
 					}
 				}
@@ -152,7 +155,7 @@ package
 		}
 		
 		/**计算两点间的直线可行通路，返回通路长度**/
-		private function getLinePath(from:int, to:int):int
+		private function getLinePath(from:int, to:int, minlen:int):int
 		{
 			var fromx:int = from % bgXgrids;
 			var fromy:int = Math.floor(from / bgXgrids);
@@ -163,13 +166,33 @@ package
 			var i:int;
 			var offset:int;
 			var diff:int;
-			var isok:Boolean = true;
 			var index:int;
 			var len:int;
+			
+			/*var next:int = from;
+			arr[linetotal++] = next;
+			var tmp:int;
+			while(next != to)
+			{
+				next = getNextLine(next, to);
+				arr[linetotal++] = next;
+				if(next == -1)
+				{
+					isok = false;
+					break;
+				}
+			}*/
+			
+			
+			
 			if(fromx == tox)
 			{
 				diff = toy - fromy;
 				len = Math.abs(diff);
+				if(len >= minlen)
+				{
+					return 0;
+				}
 				offset = diff > 0 ? 1 : -1;
 				for(i=0;i<=len;i++)
 				{
@@ -177,14 +200,18 @@ package
 					arr[linetotal++] = index;
 					if(datas[index] == 1)
 					{
-						isok = false;
+						return 0;
 					}
 				}
 			}
-			if(fromy == toy)
+			else if(fromy == toy)
 			{
 				diff = tox - fromx;
 				len = Math.abs(diff);
+				if(len >= minlen)
+				{
+					return 0;
+				}
 				offset = diff > 0 ? 1 : -1;
 				for(i=0;i<=len;i++)
 				{
@@ -192,15 +219,19 @@ package
 					arr[linetotal++] = index;
 					if(datas[index] == 1)
 					{
-						isok = false;
+						return 0;
 					}
 				}
 			}
-			if(Math.abs( (toy - fromy) / (tox - fromx) ) == 1)
+			else if(Math.abs( (toy - fromy) / (tox - fromx) ) == 1)
 			{
 				var diffx:int = tox - fromx;
 				var diffy:int = toy - fromy;
 				len = Math.abs(diff);
+				if(len >= minlen)
+				{
+					return 0;
+				}
 				var offsetx:int = diffx > 0 ? 1 : -1;
 				var offsety:int = diffy > 0 ? 1 : -1;
 				for(i=0;i<=len;i++)
@@ -209,15 +240,28 @@ package
 					arr[linetotal++] = index;
 					if(datas[index] == 1)
 					{
-						isok = false;
+						return 0;
 					}
 				}
 			}
-			if(isok == false)
+			else
 			{
-				linetotal = 0;
+				
 			}
 			return linetotal;
+		}
+		
+		/**根据起点和终点得到的最佳下一点**/
+		private function getNextLine(index:int, to:int):int
+		{
+			var next:int;
+			var way:int = getWay(index, to);
+			next = towards(index, way);
+			if(next > -1 && next < datas.length && datas[next] == 0)
+			{
+				return next;
+			}
+			return -1;
 		}
 		
 		/**以某个方向为中心的扩散顺序**/
@@ -356,26 +400,11 @@ package
 			return -1;
 		}
 		
-		/**某个点是否已经尝试过**/
-		private function hasMoved(index:int):Boolean
-		{
-			return tmppath[index] == 1;
-			var i:int;
-			for each(i in tmppath)
-			{
-				if(i == index)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-		
 		/**某个点是否可达**/
 		private function isIndexOK(index:int):Boolean
 		{
 			if(index > -1 && index < datas.length &&  
-				datas[index] == 0 && hasMoved(index) == false)
+				datas[index] == 0 && tmppath[index] == 0)
 			{
 				return true;
 			}

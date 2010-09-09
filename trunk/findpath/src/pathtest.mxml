@@ -17,85 +17,18 @@
 			private var setflag:int;
 			private var test:TestPath;
 			
+			private var f:FileReference;
+			
 			protected function application1_creationCompleteHandler(event:FlexEvent):void
 			{
 				// TODO Auto-generated method stub
 				test = new TestPath;
 				grids.rawChildren.addChild(test);
-				//astar = new AStarExample;
-				//grids.rawChildren.addChild(astar);
 				sizetxt.text = Path.instance.bgXgrids + "x" + Path.instance.bgYgrids;
-				return;
-				datas = [];
-				var i:int;
-				var xx:int;
-				var yy:int;
-				var total:int = bgXgrids * bgYgrids;
-				var lbl:Label;
-				for(i=0;i<total;i++)
-				{
-					xx = i % bgXgrids;
-					yy = Math.floor(i / bgXgrids);
-					if(Math.random()<0.3)
-					{
-						datas.push(1);
-					}
-					else
-					{
-						datas.push(0);
-					}
-					lbl = new Label;
-					lbl.data = i;
-					lbl.addEventListener(MouseEvent.CLICK, onClick);
-					lbl.text = i.toString();//datas[i];
-					if(datas[i] == 1)
-					{
-						lbl.setStyle("color", 0xFFEE00);
-					}
-					else
-					{
-						lbl.setStyle("color", 0xFFFFFF);
-					}
-					lbl.width = 30;
-					lbl.x = xx * 30;
-					lbl.y = yy * 30;
-					lbl.setStyle("paddingLeft", 0);
-					lbl.setStyle("paddingRight", 0);
-					grids.addChild(lbl);
-				}
-				setflag = 1;
-			}
-			
-			private function onClick(e:MouseEvent):void
-			{
-				var lbl:Label = Label(e.currentTarget);
-				var i:int = int(lbl.data);
-				if(setflag == 1)
-				{
-					grids.getChildAt(fromp).filters = null;
-					fromp = i;
-					lbl.filters = [new GlowFilter(0xFFFF00)];
-					top = fromp;
-				}
-				if(setflag == 2)
-				{
-					grids.getChildAt(fromp).filters = null;
-					fromp = top;
-					grids.getChildAt(fromp).filters = [new GlowFilter(0xFFFF00)];
-					top = i;
-					lbl.filters = [new GlowFilter(0xFF0000)];
-					findpath();
-				}
-				if(setflag == 3)
-				{
-					lbl.setStyle("color", 0xFFEE00);
-					Path.instance.datas[lbl.data] = 1;
-				}
-				if(setflag == 4)
-				{
-					lbl.setStyle("color", 0xFFFFFF);
-					Path.instance.datas[lbl.data] = 0;
-				}
+				
+				f = new FileReference;
+				f.addEventListener(Event.COMPLETE, onLoad);
+				f.addEventListener(Event.SELECT, onSelect);
 			}
 			
 			protected function settype(value:int):void
@@ -125,38 +58,7 @@
 				// TODO Auto-generated method stub
 				settype(2);
 				return;
-				var t1:int = flash.utils.getTimer();
-				var arr:Array = Path.instance.find(fromp, top);
-				var t2:int = flash.utils.getTimer();
-				pathstr.text = arr.toString();
-				timetxt.text = (t2 - t1).toString() + "ms";
-				grids.graphics.clear();
-				grids.graphics.lineStyle(1, 0xFFF000);
-				current = 0;
-				var fromx:int = arr[current] % bgXgrids;
-				var fromy:int = Math.floor(arr[current] / bgXgrids);
-				grids.graphics.moveTo(fromx*30+6, fromy*30+8);
-				if(interval != 0)
-				{
-					clearInterval(interval);
-				}
-				interval = setInterval(drawTimer, 50, arr);
 			}
-
-			private var current:int;
-			private var interval:int;
-			private function drawTimer(arr:Array):void
-			{
-				var fromx:int = arr[current] % Path.instance.bgXgrids;
-				var fromy:int = Math.floor(arr[current] / Path.instance.bgXgrids);
-				grids.graphics.lineTo(fromx*30+6, fromy*30+8);
-				current++;
-				if(current == arr.length)
-				{
-					clearInterval(interval);
-				}
-			}
-
 
 			protected function button1_clickHandler(event:MouseEvent):void
 			{
@@ -168,21 +70,6 @@
 				Path.instance.bgYgrids = test.MAP_HEIGHT;
 				test.reset(Number(level.value));
 				return;
-				var i:int;
-				var lbl:Label;
-				for(i=0;i<grids.numChildren;i++)
-				{
-					datas[i] = (0);
-					lbl = Label(grids.getChildAt(i));
-					if(datas[i] == 1)
-					{
-						lbl.setStyle("color", 0xFFEE00);
-					}
-					else
-					{
-						lbl.setStyle("color", 0xFFFFFF);
-					}
-				}
 			}
 
 
@@ -202,23 +89,69 @@
 				sizetxt.text = "45x20";
 			}
 
+
+			protected function button3_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				var str:String = Path.instance.bgXgrids + "|" + Path.instance.bgYgrids + "|";
+				str += Path.instance.datas.join("");
+				var barr:ByteArray = new ByteArray;
+				barr.writeUTFBytes(str);
+				var f:FileReference = new FileReference;
+				f.save(barr, "pathdata.txt");
+			}
+
+
+			protected function button4_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				f.browse();
+			}
+			
+			private function onSelect(e:Event):void
+			{
+				f.load();
+			}
+			
+			private function onLoad(e:Event):void
+			{
+				var str:String = f.data.readUTFBytes(f.data.length);
+				var arr:Array = str.split("|");
+				Path.instance.bgXgrids = arr[0];
+				Path.instance.bgYgrids = arr[1];
+				var datas:Array = String(arr[2]).split("");
+				Path.instance.init(datas);
+				test.MAP_WIDTH = arr[0];
+				test.MAP_HEIGHT = arr[1];
+				test.reset(0, datas);
+			}
+
 		]]>
 	</mx:Script>
-	<mx:Canvas id="grids" x="41" y="95" width="510" height="376" clipContent="false" >
+	<mx:Canvas id="grids" x="41" y="115" width="510" height="376" clipContent="false" >
 	</mx:Canvas>
-	<mx:Button id="btngo" selected="true" x="41" y="10" label="GO" click="findpath()"/>
-	<mx:TextArea id="pathstr" x="41" y="40" width="701" height="47"/>
-	<mx:TextInput x="175" y="10" id="sizetxt" text="10x8" width="60"/>
-	<mx:Button x="340" y="10" label="reset" click="button1_clickHandler(event)"/>
-	<mx:Button id="btn1" x="445" y="10" label="1" click="settype(3)"/>
-	<mx:Button id="btn0" x="493" y="10" label="0" click="settype(4)"/>
-	<mx:Label id="timetxt" x="627" y="12" text="Label" width="115" textAlign="right"/>
-	<mx:CheckBox x="594" y="10" label="modify" id="modifybtn"/>
-	<mx:Label x="141" y="12" text="尺寸："/>
-	<mx:Label x="239" y="12" text="密度："/>
-	<mx:HSlider value="0.3" minimum="0" maximum="1" snapInterval="0.1" id="level"  x="266" y="11" width="70"/>
-	<mx:Label x="412" y="12" text="编辑："/>
-	<mx:Button x="96" y="10" label="45x20" width="41" paddingLeft="0" paddingRight="0" 
+	<mx:Button id="btngo" selected="true" x="41" y="9" label="GO" click="findpath()"/>
+	<mx:TextArea id="pathstr" x="41" y="63" width="701" height="47"/>
+	<mx:TextInput x="175" y="9" id="sizetxt" text="10x8" width="60"/>
+	<mx:Button x="340" y="9" label="reset" click="button1_clickHandler(event)"/>
+	<mx:Button id="btn1" x="445" y="9" label="1" click="settype(3)"/>
+	<mx:Button id="btn0" x="493" y="9" label="0" click="settype(4)"/>
+	<mx:Label id="timetxt" x="627" y="11" text="Label" width="115" textAlign="right"/>
+	<mx:CheckBox x="594" y="9" label="modify" id="modifybtn"/>
+	<mx:Label x="141" y="11" text="尺寸："/>
+	<mx:Label x="239" y="11" text="密度："/>
+	<mx:HSlider value="0.3" minimum="0" maximum="1" snapInterval="0.1" id="level"  x="266" y="10" width="70"/>
+	<mx:Label x="412" y="11" text="编辑："/>
+	<mx:Button x="96" y="9" label="45x20" width="41" paddingLeft="0" paddingRight="0" 
 			    click="button2_clickHandler(event)"/>
-	<mx:CheckBox x="555" y="10" label="A*" id="abtn"/>
+	<mx:CheckBox x="555" y="9" label="A*" id="abtn"/>
+	<mx:Button click="button4_clickHandler(event)" x="41" y="36" label="Load"/>
+	<mx:Button click="button3_clickHandler(event)" x="102" y="36" label="Save"/>
+	<mx:TextInput id="startpos" x="325" y="36" width="71"/>
+	<mx:TextInput id="endpos" x="445" y="36" width="71"/>
+	<mx:TextInput id="currentpos" x="645" y="36" width="71"/>
+	<mx:Label x="294" y="39" text="起点："/>
+	<mx:Label x="414" y="39" text="终点："/>
+	<mx:Label x="604" y="39" text="当前点："/>
+	<mx:Button x="529" y="36" label="SET"/>
 </mx:Application>
