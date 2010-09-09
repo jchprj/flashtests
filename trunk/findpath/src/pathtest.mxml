@@ -22,6 +22,8 @@
 				// TODO Auto-generated method stub
 				test = new TestPath;
 				grids.rawChildren.addChild(test);
+				//astar = new AStarExample;
+				//grids.rawChildren.addChild(astar);
 				sizetxt.text = Path.instance.bgXgrids + "x" + Path.instance.bgYgrids;
 				return;
 				datas = [];
@@ -187,7 +189,10 @@
 			protected function application1_mouseUpHandler(event:MouseEvent):void
 			{
 				// TODO Auto-generated method stub
-				test.mouseflag = false;
+				if(test)
+				{
+					test.mouseflag = false;
+				}
 			}
 
 
@@ -205,14 +210,15 @@
 	<mx:TextArea id="pathstr" x="41" y="40" width="701" height="47"/>
 	<mx:TextInput x="175" y="10" id="sizetxt" text="10x8" width="60"/>
 	<mx:Button x="340" y="10" label="reset" click="button1_clickHandler(event)"/>
-	<mx:Button id="btn1" x="455" y="10" label="1" click="settype(3)"/>
-	<mx:Button id="btn0" x="503" y="10" label="0" click="settype(4)"/>
+	<mx:Button id="btn1" x="445" y="10" label="1" click="settype(3)"/>
+	<mx:Button id="btn0" x="493" y="10" label="0" click="settype(4)"/>
 	<mx:Label id="timetxt" x="627" y="12" text="Label" width="115" textAlign="right"/>
-	<mx:CheckBox x="584" y="10" label="modify" id="modifybtn"/>
+	<mx:CheckBox x="594" y="10" label="modify" id="modifybtn"/>
 	<mx:Label x="141" y="12" text="尺寸："/>
 	<mx:Label x="239" y="12" text="密度："/>
 	<mx:HSlider value="0.3" minimum="0" maximum="1" snapInterval="0.1" id="level"  x="266" y="11" width="70"/>
-	<mx:Label x="422" y="12" text="编辑："/>
+	<mx:Label x="412" y="12" text="编辑："/>
 	<mx:Button x="96" y="10" label="45x20" width="41" paddingLeft="0" paddingRight="0" 
 			    click="button2_clickHandler(event)"/>
+	<mx:CheckBox x="555" y="10" label="A*" id="abtn"/>
 </mx:Application>

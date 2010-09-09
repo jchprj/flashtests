@@ -10,7 +10,10 @@ package
 		/**地图障碍数据**/
 		public var datas:Array;
 		/**寻路路径数据**/
+		private var paths:Array;
 		private var tmppath:Array;
+		private var spreadOrder:Array = [0,0,0,0,0,0,0];
+		private var linepath:Array;
 		
 		public var modifyflag:Boolean;
 		
@@ -27,51 +30,56 @@ package
 			return _instance;
 		}
 		
+		public function init(data:Array):void
+		{
+			this.datas = data;
+			tmppath = [];
+			linepath = [];
+			var i:int;
+			var len:int = datas.length;
+			for(i=0;i<len;i++)
+			{
+				tmppath.push(0);
+				linepath.push(0);
+			}
+		}
+		
 		private function getPath(from:int, to:int, flag:Boolean = true):Array
 		{
 			var path:Array = [];
 			var tmp:int;
 			var next:int;
-			tmppath = [];
+			//tmppath = [];
+			var i:int;
+			var len:int = datas.length;
+			for(i=0;i<len;i++)
+			{
+				tmppath[i] = 0;
+			}
 			next = from;
 			path.push(next);
-			tmppath.push(next);
-			var i:int;
+			tmppath[next] = 1;
 			var newway:int;
 			var last:int;
 			var lasttimes:int;
-			var spread:Array;
 			while(next != to)
 			{
-				if(last == next)
-				{
-					lasttimes++;
-					if(lasttimes == 10)
-					{
-						break;
-					}
-				}
-				else
-				{
-					lasttimes = 0;
-				}
-				last = next;
 				tmp = getNext(next, to);
 				if(tmp != -1)
 				{
 					next = tmp;
 					path.push(next);
-					tmppath.push(next);
+					tmppath[next] = 1;
 				}
 				else
 				{
-					spread = spreadNext(getWay(next, to), flag);
+					setSpread(getWay(next, to), flag);
 					for(i=0;i<8;i++)
 					{
-						newway = towards(next, spread[i]);
+						newway = towards(next, spreadOrder[i]);
 						if(isIndexOK(newway))
 						{
-							tmppath.push(newway);
+							tmppath[newway] = 1;
 							break;
 						}
 					}
@@ -81,7 +89,22 @@ package
 						{
 							next = path[path.length - 2];
 							path.pop();
+							//tmppath.pop();
 						}
+						if(last == next)
+						{
+							lasttimes++;
+							if(lasttimes == 10)
+							{
+								path.splice(1, path.length - 1);
+								break;
+							}
+						}
+						else
+						{
+							lasttimes = 0;
+						}
+						last = next;
 					}
 					else
 					{
@@ -103,47 +126,55 @@ package
 			var i:int;
 			var j:int;
 			var k:int;
-			var pathx:Array;
-			for(i=0;i<path.length - 1;i++)
+			var linetotal:int;
+			var len:int = path.length - 1;
+			for(i=0;i<len;i++)
 			{
-				for(j=i+1;j<path.length;j++)
+				for(j=i+1;j<len;j++)
 				{
-					pathx = getLinePath(path[i], path[j]);
-					if(pathx.length > 1 && calPath(pathx) < calPath(path, i, j))
+					if(j - i > 1)
 					{
-						path.splice(i, j-i+1);
-						for(k=0;k<pathx.length;k++)
+						linetotal = getLinePath(path[i], path[j]);
+						if(linetotal > 1 && calPath(linepath, 0, linetotal - 1) < calPath(path, i, j))
 						{
-							path.splice(i+k, 0, pathx[k]);
+							path.splice(i, j-i+1);
+							for(k=0;k<linetotal;k++)
+							{
+								path.splice(i+k, 0, linepath[k]);
+							}
+							len = path.length - 1;
+							i = -1;
+							break;
 						}
-						i = -1;
-						break;
 					}
 				}
 			}
 		}
 		
-		/**计算两点间的直线可行通路**/
-		private function getLinePath(from:int, to:int):Array
+		/**计算两点间的直线可行通路，返回通路长度**/
+		private function getLinePath(from:int, to:int):int
 		{
 			var fromx:int = from % bgXgrids;
 			var fromy:int = Math.floor(from / bgXgrids);
 			var tox:int = to % bgXgrids;
 			var toy:int = Math.floor(to / bgXgrids);
-			var arr:Array = [];
+			var linetotal:int;
+			var arr:Array = linepath;
 			var i:int;
 			var offset:int;
 			var diff:int;
 			var isok:Boolean = true;
 			var index:int;
+			var len:int;
 			if(fromx == tox)
 			{
 				diff = toy - fromy;
-				offset = diff / Math.abs(diff);
-				for(i=0;i<=Math.abs(diff);i++)
+				len = Math.abs(diff);
+				offset = diff > 0 ? 1 : -1;
+				for(i=0;i<=len;i++)
 				{
 					index = (fromy + offset * i) * bgXgrids + fromx;
-					arr.push(index);
+					arr[linetotal++] = index;
 					if(datas[index] == 1)
 					{
 						isok = false;
@@ -153,11 +184,12 @@ package
 			if(fromy == toy)
 			{
 				diff = tox - fromx;
-				offset = diff / Math.abs(diff);
-				for(i=0;i<=Math.abs(diff);i++)
+				len = Math.abs(diff);
+				offset = diff > 0 ? 1 : -1;
+				for(i=0;i<=len;i++)
 				{
 					index = (from + offset * i);
-					arr.push(index);
+					arr[linetotal++] = index;
 					if(datas[index] == 1)
 					{
 						isok = false;
@@ -168,12 +200,13 @@ package
 			{
 				var diffx:int = tox - fromx;
 				var diffy:int = toy - fromy;
-				var offsetx:int = diffx / Math.abs(diffx);
-				var offsety:int = diffy / Math.abs(diffy);
-				for(i=0;i<=Math.abs(diffx);i++)
+				len = Math.abs(diff);
+				var offsetx:int = diffx > 0 ? 1 : -1;
+				var offsety:int = diffy > 0 ? 1 : -1;
+				for(i=0;i<=len;i++)
 				{
 					index = (fromy + offsety * i) * bgXgrids + fromx + offsetx * i;
-					arr.push(index);
+					arr[linetotal++] = index;
 					if(datas[index] == 1)
 					{
 						isok = false;
@@ -182,35 +215,34 @@ package
 			}
 			if(isok == false)
 			{
-				arr.splice(0, arr.length);
+				linetotal = 0;
 			}
-			return arr;
+			return linetotal;
 		}
 		
 		/**以某个方向为中心的扩散顺序**/
-		private function spreadNext(way:int, flag:Boolean):Array
+		private function setSpread(way:int, flag:Boolean):void
 		{
-			var arr:Array = [];
+			var i:int;
 			if(flag)
 			{
-				arr.push(absway(way-1));
-				arr.push(absway(way+1));
-				arr.push(absway(way-2));
-				arr.push(absway(way+2));
-				arr.push(absway(way-3));
-				arr.push(absway(way+3));
+				spreadOrder[i++] = absway(way-1);
+				spreadOrder[i++] = absway(way+1);
+				spreadOrder[i++] = absway(way-2);
+				spreadOrder[i++] = absway(way+2);
+				spreadOrder[i++] = absway(way-3);
+				spreadOrder[i++] = absway(way+3);
 			}
 			else
 			{
-				arr.push(absway(way+1));
-				arr.push(absway(way-1));
-				arr.push(absway(way+2));
-				arr.push(absway(way-2));
-				arr.push(absway(way+3));
-				arr.push(absway(way-3));
+				spreadOrder[i++] = absway(way+1);
+				spreadOrder[i++] = absway(way-1);
+				spreadOrder[i++] = absway(way+2);
+				spreadOrder[i++] = absway(way-2);
+				spreadOrder[i++] = absway(way+3);
+				spreadOrder[i++] = absway(way-3);
 			}
-			arr.push(absway(way+4));
-			return arr;
+			spreadOrder[i++] = absway(way+4);
 		}
 		
 		private function absway(way:int):int
@@ -327,10 +359,11 @@ package
 		/**某个点是否已经尝试过**/
 		private function hasMoved(index:int):Boolean
 		{
+			return tmppath[index] == 1;
 			var i:int;
-			for(i=0;i<tmppath.length;i++)
+			for each(i in tmppath)
 			{
-				if(tmppath[i] == index)
+				if(i == index)
 				{
 					return true;
 				}
