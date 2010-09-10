@@ -39,6 +39,7 @@
 				btn1.selected = false;
 				btn0.selected = false;
 				btngo.selected = false;
+				frombtn.selected = false;
 				if(value == 3)
 				{
 					btn1.selected = true;
@@ -50,6 +51,10 @@
 				if(value == 2)
 				{
 					btngo.selected = true;
+				}
+				if(value == 5)
+				{
+					frombtn.selected = true;
 				}
 			}
 
@@ -154,4 +159,5 @@
 	<mx:Label x="414" y="39" text="终点："/>
 	<mx:Label x="604" y="39" text="当前点："/>
 	<mx:Button x="529" y="36" label="SET"/>
+	<mx:Button id="frombtn" click="settype(5)" x="199" y="37" label="from"/>
 </mx:Application>

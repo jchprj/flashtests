@@ -47,6 +47,10 @@ package
 		private function getPath(from:int, to:int, wayflag:Boolean = true):Array
 		{
 			var path:Array = [];
+			if(datas[to] == 1)
+			{
+				return path;
+			}
 			var tmp:int;
 			var next:int;
 			//tmppath = [];
@@ -168,22 +172,6 @@ package
 			var diff:int;
 			var index:int;
 			var len:int;
-			
-			/*var next:int = from;
-			arr[linetotal++] = next;
-			var tmp:int;
-			while(next != to)
-			{
-				next = getNextLine(next, to);
-				arr[linetotal++] = next;
-				if(next == -1)
-				{
-					isok = false;
-					break;
-				}
-			}*/
-			
-			
 			
 			if(fromx == tox)
 			{

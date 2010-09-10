@@ -114,6 +114,16 @@ package
 		
 		private function clickHandler(event : MouseEvent) : void 
 		{ 
+			if(setflag == 5)
+			{
+				var pos:int = int(screen.mouseY)*MAP_WIDTH + int(screen.mouseX);
+				if(Path.instance.datas[pos] == 0)
+				{
+					screen.bitmapData.setPixel(playPoint.x,playPoint.y,0xFFFFFF); 
+					playPoint = new Point(int(screen.mouseX),int(screen.mouseY)); 
+					screen.bitmapData.setPixel(playPoint.x,playPoint.y,0xFF0000);
+				}
+			}
 			if(setflag != 2 || 
 				screen.mouseX < 0 || screen.mouseX > MAP_WIDTH ||
 				screen.mouseY < 0 || screen.mouseY > MAP_HEIGHT)
