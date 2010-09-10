@@ -227,7 +227,7 @@ package
 			{
 				var diffx:int = tox - fromx;
 				var diffy:int = toy - fromy;
-				len = Math.abs(diff);
+				len = Math.abs(diffx);
 				if(len >= minlen)
 				{
 					return 0;
