@@ -11,13 +11,18 @@ package
 	{
 		private var bg:Sprite;
 		private var mapGrid:MapGrid;
+		private var mapEditor:MapEditor;
 		
 		public function Main()
 		{
 			bg = new Sprite;
 			addChild(bg);
+			
 			mapGrid = new MapGrid;
 			addChild(mapGrid);
+			
+			mapEditor = new MapEditor;
+			addChild(mapEditor);
 			
 			var ld:Loader = new Loader;
 			ld.load(new URLRequest("map79.jpg"));

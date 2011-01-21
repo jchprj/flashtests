@@ -23,9 +23,6 @@ package
 			this.graphics.beginFill(0x0, 0);
 			this.graphics.drawRect(0, 0, 1000, 600);
 			this.graphics.endFill();
-			this.graphics.beginFill(0x0, 0.7);
-			this.graphics.drawRect(0, 50, 200, 600);
-			this.graphics.endFill();
 			this.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 			
 			gridBg = new Sprite;
@@ -46,7 +43,7 @@ package
 			
 			var xi:int = point.x / lineDistance;
 			var yi:int = point.y / lineDistance;
-			trace(xi, yi);
+			Map.trace(xi, yi);
 			if((lastXi != -1 || lastYi != -1) && (lastXi != xi || lastYi != yi))
 			{
 			}
